@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from modes import logger
+from . import logger
 
 
 def main():
@@ -51,5 +51,4 @@ def main():
     sys.exit(0)
 
 
-if __name__ == '__main__':
-    main()
+main()

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import time
 
-from modes import Mode, logger
+from . import Mode, logger
 
 
 class TPUtil(object):

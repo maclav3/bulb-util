@@ -1,5 +1,4 @@
 import abc
-import enum
 
 import colorlog
 
@@ -12,7 +11,7 @@ logger.setLevel('DEBUG')
 logger.addHandler(handler)
 
 
-class Mode(enum.Enum, abc.ABC):
+class Mode(abc.ABCMeta):
     CIRCADIAN = 'circadian'
     MUSIC = 'music'
     JOYSTICK = 'joystick'
