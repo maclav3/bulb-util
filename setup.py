@@ -10,7 +10,12 @@ setup(
     author_email='maclav3@gmail.com',
     url='https://github.com/maclav3/tplink-util',
     packages=['tplink-util'],
-    requires=['pyHS100', 'colorlog'],
+    requires=[
+        'pyHS100',
+        'colorlog',
+        'python-geoip',
+        'python-geoip-geolite2'
+    ],
     entry_points={
         'console_scripts': [
             'tplink-util = modes.__main__:main'

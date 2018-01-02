@@ -1,23 +1,7 @@
 import argparse
-import enum
 import sys
 
-import colorlog
-
-
-class Mode(enum.Enum):
-    CIRCADIAN = 'circadian'
-    MUSIC = 'music'
-    JOYSTICK = 'joystick'
-
-
-handler = colorlog.StreamHandler()
-handler.setFormatter(colorlog.ColoredFormatter(
-    '%(log_color)s%(levelname)s:%(pathname)s:%(lineno)d: %(message)s'))
-
-logger = colorlog.getLogger('main')
-logger.setLevel('DEBUG')
-logger.addHandler(handler)
+from modes import logger
 
 
 def main():
@@ -42,6 +26,8 @@ def main():
 
     circadianOpts.add_argument('--latitude', '--lat', dest='lat', type=float, help='''Set the latitude for daylight simulation. 
     Ranges from -90.0 (Southern hemisphere) to +90.0 (Northern hemisphere). Defaults to the device's current latitude''')
+
+    parser.add_argument('--timestep', type=float, default=0, help='''Set the timestep for changing the lighting.''')
 
     args = parser.parse_args()
 
