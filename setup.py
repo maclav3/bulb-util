@@ -10,5 +10,10 @@ setup(
     author_email='maclav3@gmail.com',
     url='https://github.com/maclav3/tplink-util',
     packages=['tplink-util'],
-    requires=['pyHS100']
+    requires=['pyHS100', 'colorlog'],
+    entry_points={
+        'console_scripts': [
+            'tplink-util = modes.__main__:main'
+        ]
+    }
 )
