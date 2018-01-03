@@ -3,22 +3,21 @@
 from distutils.core import setup
 
 setup(
-    name='tplink-util',
+    name='tplinkutil',
     version='1.0',
     description='A cli util to control TP-Link smart bulbs with cool features',
     author='Maciej Bratek',
     author_email='maclav3@gmail.com',
-    url='https://github.com/maclav3/tplink-util',
-    packages=['tplink-util'],
+    url='https://github.com/maclav3/tplinkutil',
+    packages=['tplinkutil'],
     requires=[
         'pyHS100',
         'colorlog',
-        'python-geoip',
-        'python-geoip-geolite2'
+        'GeoIP'
     ],
     entry_points={
         'console_scripts': [
-            'tplink-util = modes.__main__:main'
+            'tplinkutil = modes.__main__:main'
         ]
     }
 )

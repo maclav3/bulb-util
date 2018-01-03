@@ -1,7 +1,8 @@
 import argparse
 import sys
 
-from . import logger
+from tplinkutil import logger, tputil
+from tplinkutil.modes import circadian
 
 
 def main():
@@ -37,8 +38,7 @@ def main():
         sys.exit(1)
 
     if args.circadian:
-        logger.info('Not implemented yet, sorry')
-        sys.exit(2)
+        tp = tputil.TPUtil(circadian.Circadian(args.timestep, args.lat, args.long))
 
     if args.music:
         logger.info('Not implemented yet, sorry')
@@ -48,7 +48,7 @@ def main():
         logger.info('Not implemented yet, sorry')
         sys.exit(2)
 
-    sys.exit(0)
+    tp.run()
 
 
 main()
