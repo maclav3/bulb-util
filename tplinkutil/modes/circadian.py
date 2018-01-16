@@ -2,36 +2,27 @@ import time as t
 
 from astropy.time import Time
 from numpy import sin, arcsin, pi, cos, arccos
+from tzlocal import get_localzone
 
-from tplinkutil import logger
+from tplinkutil import logger as log
 from tplinkutil.modes import Mode
 from tplinkutil.utils.geoip import GeoIP
 
 
 class Circadian(Mode):
-    def __init__(self, timestep=None, latitude=None, longitude=None, geoip=GeoIP()):
+    def __init__(self, timestep: float = None, latitude: float = None, longitude: float = None, geoip=GeoIP()):
         Mode.__init__(self, self, timestep=timestep)
         if not self.timestep:
             self.timestep = 60  # seconds
 
         self.geoip = geoip
-        self.latitude = latitude
-        self.longitude = longitude
-        if not latitude or not longitude:
-            location = self.geoip.getLatLong()
-
-            if not latitude:
-                self.latitude = location['latitude']
-                logger.info('Latitude not supplied, setting latitude to %f from geoip data' % (self.latitude))
-            if not longitude:
-                self.longitude = location['longitude']
-                logger.info('Longitude not supplied, setting longitude to %f from geoip data' % (self.longitude))
+        self.latitude, self.longitude = geoip.completeLatLong(latitude, longitude)
 
     def getname(self):
         return 'circadian'
 
     def __call__(self):
-        logger.debug('circadian action')
+        log.debug('circadian action')
 
 
 # Disclaimer from the author - I have limited knowledge in Astronomy, so what I'm doing is probably terribly wrong
@@ -40,10 +31,10 @@ class Sun:
     """Calculates the current position of the sun in the sky"""
 
     # https://en.wikipedia.org/wiki/Sunrise_equation#Complete_calculation_on_Earth
-    def __init__(self, latitude: float, longitude: float):
-        self._lat = latitude
-        self._long = longitude
-        self._t = t.time()
+    def __init__(self, latitude: float = None, longitude: float = None, timestamp: float = None, geoip=GeoIP()):
+        self._lat, self._long = geoip.completeLatLong(latitude, longitude)
+        self._t = timestamp or t.time()
+        self._tz = get_localzone()
 
     @property
     def _julian_date(self) -> float:
@@ -67,8 +58,8 @@ class Sun:
 
     @property
     def _equation_of_the_center(self) -> float:
-        M = self._solar_mean_anomaly
-        return 1.9148 * sin(M) + 0.0200 * sin(2 * M) + 0.0003 * sin(3 * M)
+        m = self._solar_mean_anomaly
+        return 1.9148 * sin(m) + 0.0200 * sin(2 * m) + 0.0003 * sin(3 * m)
 
     @property
     def _ecliptic_longitude(self) -> float:
@@ -106,3 +97,17 @@ class Sun:
     @property
     def sunrise(self):
         return Time(self._julian_sunrise, format='jd').unix
+
+
+if __name__ == '__main__':
+    from datetime import datetime, timedelta
+
+    tz = get_localzone()
+    d = datetime.now(tz)
+    d = datetime(d.year, d.month, d.day, 0, 0, 0, 0)
+    for i in range(23):
+        d = d + timedelta(hours=1)
+        s = Sun(timestamp=d.timestamp())
+        print('Sunrise: ', datetime.fromtimestamp(s.sunrise, tz=tz))
+        print('Sunset : ', datetime.fromtimestamp(s.sunset, tz=tz))
+        print('')
