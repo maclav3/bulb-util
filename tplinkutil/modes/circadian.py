@@ -1,7 +1,7 @@
-import time
+import time as t
 
-import astropy as astropy
-from numpy import sin
+from astropy.time import Time
+from numpy import sin, arcsin, pi, cos, arccos
 
 from tplinkutil import logger
 from tplinkutil.modes import Mode
@@ -40,15 +40,15 @@ class Sun:
     """Calculates the current position of the sun in the sky"""
 
     # https://en.wikipedia.org/wiki/Sunrise_equation#Complete_calculation_on_Earth
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude: float, longitude: float):
         self._lat = latitude
         self._long = longitude
-        self._t = time.time()
+        self._t = t.time()
 
     @property
     def _julian_date(self) -> float:
         """Returns the julian date corresponding to the moment in time"""
-        return astropy.time.Time(self._t, format='unix').jd
+        return Time(self._t, format='unix').jd
 
     @property
     def _julian_day(self) -> float:
@@ -77,3 +77,32 @@ class Sun:
 
     @property
     def _solar_transit(self) -> float:
+        return 2451545.5 + self._mean_solar_noon + 0.0053 * sin(self._solar_mean_anomaly) - \
+               0.0069 * sin(2 * self._ecliptic_longitude)
+
+    @property
+    def _declination_of_sun(self) -> float:
+        return arcsin(sin(self._ecliptic_longitude) * sin(23.44 * pi / 180.0))
+
+    @property
+    def hour_angle(self) -> float:
+        numerator = sin(-0.83 * pi / 180.0) - sin(self._lat) * sin(self._declination_of_sun)
+        denominator = cos(self._lat) * cos(self._declination_of_sun)
+
+        return arccos(numerator / denominator)
+
+    @property
+    def _julian_sunset(self):
+        return self._solar_transit + self.hour_angle / (2 * pi)
+
+    @property
+    def _julian_sunrise(self):
+        return self._solar_transit - self.hour_angle / (2 * pi)
+
+    @property
+    def sunset(self):
+        return Time(self._julian_sunset, format='jd').unix
+
+    @property
+    def sunrise(self):
+        return Time(self._julian_sunrise, format='jd').unix
