@@ -1,7 +1,8 @@
 import time
 from datetime import datetime, timedelta
 
-from pysolar import solar
+import pytz
+from pysolar import solar, radiation
 from tzlocal import get_localzone
 
 from tplinkutil import logger as log
@@ -28,14 +29,23 @@ class Circadian(Mode):
 class Sun:
     """Calculates the current position of the sun in the sky"""
 
-    def __init__(self, latitude: float = None, longitude: float = None, timestamp: float = None, geoip=GeoIP()):
+    def __init__(self,
+                 latitude: float = None,
+                 longitude: float = None,
+                 dt: [int, datetime, time.struct_time] = None,
+                 tz: [pytz.tzfile.DstTzInfo, pytz.tzfile.StaticTzInfo] = None,
+                 geoip=GeoIP()
+                 ):
         self._lat, self._long = geoip.completeLatLong(latitude, longitude)
-        self._t = timestamp
-        self._tz = get_localzone()
+        self._tz = tz or get_localzone()
+        self._dt = None
+        self._dt = self.__getdatetime(dt)
 
     def __getdatetime(self, t: [int, datetime, time.struct_time] = None) -> datetime:
         if not t:
-            return datetime.now(tz=self._tz)
+            if not self._dt:
+                return datetime.now(tz=self._tz)
+            return self._dt
         if isinstance(t, int):
             return datetime.fromtimestamp(t, tz=self._tz)
         if isinstance(t, datetime):
@@ -44,16 +54,16 @@ class Sun:
             return datetime.fromtimestamp(time.mktime(t), tz=self._tz)
 
     @property
-    def t(self):
-        return self._t
+    def dt(self) -> datetime:
+        return self._dt
 
-    @t.setter
-    def t(self, value):
-        self._t = value
+    @dt.setter
+    def dt(self, t: [int, datetime, time.struct_time]):
+        self._dt = self.__getdatetime(t)
 
-    @t.deleter
-    def t(self):
-        self._t = None
+    @dt.deleter
+    def dt(self):
+        self._dt = None
 
     @property
     def latitude(self):
@@ -76,20 +86,35 @@ class Sun:
         dt = self.__getdatetime(t)
         return solar.get_altitude(self._lat, self._long, dt)
 
-    def azimuth(self, t: [int, datetime, time.struct_time] = None) -> float:
-        """Calculates the azimuth of the sun, in degrees"""
+    def sun_azimuth(self, t: [int, datetime, time.struct_time] = None) -> float:
+        """Calculates the azimuth of the sun, in degrees. This differs from the usual sense of azimuth,
+        see http://docs.pysolar.org/en/latest/#estimate-of-clear-sky-radiation for details."""
         dt = self.__getdatetime(t)
-        return (solar.get_azimuth(self._lat, self._long, dt) + 360) % 360
+        return solar.get_azimuth(self._lat, self._long, dt)
+
+    def azimuth(self, t: [int, datetime, time.struct_time] = None) -> float:
+        """Calculates the azimuth of the sun, in degrees. This is in the usual geographical sense of azimuth,
+        i.e. north corresponds to 0 degrees."""
+        return (self.sun_azimuth(t) + 180.0 + 360.0) % 360.0
+
+    def radiation(self, t: [int, datetime, time.struct_time] = None) -> float:
+        """Calculates the clear-sky irradiation in W/m^2"""
+        dt = self.__getdatetime(t)
+        alt = self.altitude(t)
+        return alt > 0 and radiation.get_radiation_direct(dt, alt) or 0.0
 
 
 if __name__ == '__main__':
     tz = get_localzone()
-    d = datetime.now(tz)
-    d = datetime(d.year, d.month, d.day, 0, 0, 0, 0)
+    dt = datetime.now(tz)
+    dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
+    print('#Time\tAzimuth\tAltitude\tRadiation\n')
     for i in range(144):
-        d = d + timedelta(minutes=10)
-        t = d.isoformat()
-        alt = s.altitude(d)
-        azm = s.azimuth(d)
-        print('{}\t{}\t{}\n'.format(t, alt, azm))
+        dt = dt + timedelta(minutes=10)
+        t = dt.isoformat()
+        s.dt = dt
+        alt = s.altitude()
+        azm = s.azimuth()
+        rad = s.radiation()
+        print('{}\t{}\t{}\t{}\n'.format(t, azm, alt, rad))
