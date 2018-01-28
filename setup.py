@@ -13,7 +13,7 @@ setup(
     requires=[
         'pyHS100',
         'colorlog',
-        'GeoIP', 'tzlocal', 'pytz', 'astropy', 'numpy'
+        'GeoIP', 'tzlocal', 'pytz', 'pysolar', 'numpy', 'arrow'
     ],
     entry_points={
         'console_scripts': [
