@@ -31,6 +31,13 @@ def get():
         Ranges from -90.0 (Southern hemisphere) to +90.0 (Northern hemisphere). Defaults to the device's current latitude.
         The coordinates are looked up based on the device's IP address.''')
 
+    circadianOpts.add_argument('--min_temperature', type=float, default=2700,
+                               help='''The lowest color temperature that will be set during daylight simulation.''')
+
+    circadianOpts.add_argument('--max_temperature', type=float, default=9000,
+                               help='''The highest color temperature that will be set during daylight simulation.
+                               The color temperature will vary according to the position of the Sun in the sky.''')
+
     parser.add_argument('--timestep', type=float, default=0, metavar='(mode-dependent)',
                         help='''Set the timestep for changing the lighting.
                         Each mode has a default timestep that is best suited for its operation,
