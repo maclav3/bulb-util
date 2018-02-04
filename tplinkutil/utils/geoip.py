@@ -26,8 +26,12 @@ class GeoIP(object):
             if not latitude:
                 latitude = location['latitude']
                 log.info('Latitude not supplied, setting latitude to {} from geoip data'.format(latitude))
+            else:
+                log.info('Setting latitude to {} as requested'.format(latitude))
             if not longitude:
                 longitude = location['longitude']
                 log.info('Longitude not supplied, setting longitude to {} from geoip data'.format(longitude))
+            else:
+                log.info('Setting longitude to {} as requested'.format(longitude))
 
         return (latitude, longitude)

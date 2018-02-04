@@ -9,12 +9,17 @@ from tplinkutil import logger as log
 from tplinkutil.modes import Mode
 from tplinkutil.utils.geoip import GeoIP
 
+default_timestep = 60  # seconds
+
 
 class Circadian(Mode):
     def __init__(self, timestep: float = None, latitude: float = None, longitude: float = None, geoip=GeoIP()):
         Mode.__init__(self, self, timestep=timestep)
         if not self.timestep:
-            self.timestep = 60  # seconds
+            self.timestep = default_timestep  # seconds
+            log.info('Timestep not supplied, setting to the default {}'.format(self.timestep))
+        else:
+            log.info('Setting timestep to {} as requested'.format(self.timestep))
 
         self.geoip = geoip
         self.latitude, self.longitude = geoip.completeLatLong(latitude, longitude)
@@ -23,7 +28,8 @@ class Circadian(Mode):
         return 'circadian'
 
     def __call__(self):
-        log.debug('circadian action')
+        # todo: implement
+        log.debug('circadian mode action')
 
 
 class Sun:
