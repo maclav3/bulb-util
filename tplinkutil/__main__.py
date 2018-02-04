@@ -7,7 +7,8 @@ from tplinkutil.modes import circadian
 def main():
     args = config.get()
     if args.circadian:
-        tp = tputil.TPUtil(circadian.Circadian(args.timestep, args.lat, args.long))
+        sun = circadian.Sun(args.lat, args.long)
+        tp = tputil.TPUtil(circadian.Circadian(sun, args.timestep))
 
     if args.music:
         logger.info('Not implemented yet, sorry')

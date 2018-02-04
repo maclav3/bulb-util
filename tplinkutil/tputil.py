@@ -11,7 +11,7 @@ class TPUtil(object):
         self.mode = mode
 
     def run(self):
-        logger.info('Starting TPUtil in mode %s with timestep %f' % (self.mode.getname(), self.mode.timestep))
+        logger.info('Starting TPUtil in mode %s with timestep %f' % (self.mode.name, self.mode.timestep))
         # main loop
         while True:
             try:

@@ -10,7 +10,13 @@ class Mode(abc.ABC):
         self.mode = mode
         self.timestep = timestep
 
-    def getname(self):
+    @property
+    @abc.abstractmethod
+    def name(self):
+        """Returns the mode's name"""
         return NotImplemented
 
-    name = property(getname, 'The name of the mode')
+    @abc.abstractmethod
+    def __call__(self):
+        """This is called on each tick and is intended to change the lighting according to the mode's internal logic"""
+        return NotImplemented

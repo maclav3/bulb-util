@@ -13,7 +13,7 @@ default_timestep = 60  # seconds
 
 
 class Circadian(Mode):
-    def __init__(self, timestep: float = None, latitude: float = None, longitude: float = None, geoip=GeoIP()):
+    def __init__(self, sun: 'Sun', timestep: float = None):
         Mode.__init__(self, self, timestep=timestep)
         if not self.timestep:
             self.timestep = default_timestep  # seconds
@@ -21,11 +21,11 @@ class Circadian(Mode):
         else:
             log.info('Setting timestep to {} as requested'.format(self.timestep))
 
-        self.geoip = geoip
-        self.latitude, self.longitude = geoip.completeLatLong(latitude, longitude)
+        self.sun = sun
 
-    def getname(self):
-        return 'circadian'
+    @property
+    def name(self):
+        return Mode.CIRCADIAN
 
     def __call__(self):
         # todo: implement
@@ -111,6 +111,7 @@ class Sun:
 
 
 if __name__ == '__main__':
+    # demonstration of how Sun works
     tz = get_localzone()
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
