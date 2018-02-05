@@ -3,7 +3,7 @@ from typing import Tuple
 
 from pyHS100 import Discover, SmartBulb
 
-from tplinkutil.bulbs import Bulb, ConstantColorBulbException
+from bulbutil.bulbs import Bulb, ConstantColorBulbException
 
 
 class TPLink(Bulb):

@@ -1,7 +1,7 @@
 import sys
 
-from tplinkutil import bulbutil, config, logger
-from tplinkutil.modes import circadian
+from bulbutil import bulbutil, config, logger
+from bulbutil.modes import circadian
 
 
 def main():

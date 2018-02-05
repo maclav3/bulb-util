@@ -2,8 +2,8 @@
 import sys
 import time
 
-from tplinkutil import logger
-from tplinkutil.modes import Mode
+from bulbutil import logger
+from bulbutil.modes import Mode
 
 
 class BulbUtil(object):

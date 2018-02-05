@@ -2,7 +2,7 @@ import json
 from typing import Tuple
 from urllib import request
 
-from tplinkutil import logger as log
+from bulbutil import logger as log
 
 
 class GeoIP(object):

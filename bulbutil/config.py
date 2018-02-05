@@ -6,7 +6,7 @@ import configargparse
 def get():
     parser = configargparse.ArgumentParser(
         description='An util to control TP-link smart bulbs.\n',
-        default_config_files=('/etc/tplinkutil.conf', '~/.config/tplinkutil.conf', './tplinkutil.conf'),
+        default_config_files=('/etc/bulbutil.conf', '~/.config/bulbutil.conf', './bulbutil.conf'),
         args_for_setting_config_path=('--config',)
     )
 

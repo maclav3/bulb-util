@@ -6,10 +6,10 @@ import pytz
 from pysolar import solar, radiation
 from tzlocal import get_localzone
 
-from tplinkutil import logger as log
-from tplinkutil.bulbs import Bulb
-from tplinkutil.modes import Mode
-from tplinkutil.utils.geoip import GeoIP
+from bulbutil import logger as log
+from bulbutil.bulbs import Bulb
+from bulbutil.modes import Mode
+from bulbutil.utils.geoip import GeoIP
 
 default_timestep = 60  # seconds
 
