@@ -6,7 +6,7 @@ from tplinkutil import logger
 from tplinkutil.modes import Mode
 
 
-class TPUtil(object):
+class BulbUtil(object):
     def __init__(self, mode: Mode):
         self.mode = mode
 

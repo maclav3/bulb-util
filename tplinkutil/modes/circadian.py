@@ -1,11 +1,13 @@
 import time
 from datetime import datetime, timedelta
 
+import color_temp
 import pytz
 from pysolar import solar, radiation
 from tzlocal import get_localzone
 
 from tplinkutil import logger as log
+from tplinkutil.bulbs import Bulb
 from tplinkutil.modes import Mode
 from tplinkutil.utils.geoip import GeoIP
 
@@ -13,7 +15,7 @@ default_timestep = 60  # seconds
 
 
 class Circadian(Mode):
-    def __init__(self, sun: 'Sun', timestep: float = None):
+    def __init__(self, sun: 'Sun', bulb: Bulb, min_temperature: int, max_temperature: int, timestep: float = None):
         Mode.__init__(self, self, timestep=timestep)
         if not self.timestep:
             self.timestep = default_timestep  # seconds
@@ -21,15 +23,40 @@ class Circadian(Mode):
         else:
             log.info('Setting timestep to {} as requested'.format(self.timestep))
 
-        self.sun = sun
+        self._sun = sun
+        self._bulb = bulb
+        self.min_temperature = min_temperature
+        self.max_temperature = max_temperature
 
     @property
     def name(self):
         return Mode.CIRCADIAN
 
-    def __call__(self):
-        log.debug('circadian mode action')
-        self.sun.dt = datetime.now()
+    def __call__(self, dt=None):
+        msg = 'circadian mode action'
+        if dt:
+            msg = '{} {}'.format(dt, msg)
+        log.debug(msg)
+
+        if dt:
+            self._sun.dt = dt
+        else:
+            self._sun.dt = datetime.now()
+
+        alt = self._sun.altitude() / self._sun.max_altitude
+        rad = self._sun.radiation() / self._sun.max_radiation
+
+        if rad == 0:
+            self._bulb.turn_off()
+            return
+
+        brightness = int(100 * rad)
+        temp = int((self.max_temperature - self.min_temperature) * alt + self.min_temperature)
+
+        self._bulb.turn_on()
+        r, g, b = color_temp.temperature_to_rgb(temp)
+        self._bulb.rgb = (float(r) / 255, float(g) / 255, float(b) / 255)
+        self._bulb.brightness = brightness
 
 
 class Sun:
@@ -154,12 +181,10 @@ if __name__ == '__main__':
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
+    circ = Circadian(s, 2700, 6500)
     print('#Time\tAzimuth\tAltitude\tRadiation\n')
     for i in range(144):
         dt = dt + timedelta(minutes=10)
         t = dt.isoformat()
-        s.dt = dt
-        alt = s.altitude()
-        azm = s.azimuth()
-        rad = s.radiation()
-        print('{}\t{}\t{}\t{}\n'.format(t, azm, alt, rad))
+        circ(dt)
+        time.sleep(0.2)

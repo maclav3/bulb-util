@@ -2,8 +2,6 @@ import sys
 
 import configargparse
 
-from tplinkutil import logger
-
 
 def get():
     parser = configargparse.ArgumentParser(
