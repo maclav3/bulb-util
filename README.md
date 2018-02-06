@@ -1,4 +1,4 @@
-# tplink-util
+# bulb-util
 ##### A cli util to control smart bulbs with cool features
 
 This is a fun pastime project, which aims to both give the author something creative to do for a few evenings
