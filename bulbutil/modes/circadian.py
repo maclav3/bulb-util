@@ -7,7 +7,7 @@ from pysolar import solar, radiation
 from tzlocal import get_localzone
 
 from bulbutil import logger as log
-from bulbutil.bulbs import Bulb
+from bulbutil.bulbs import Bulb, mock
 from bulbutil.modes import Mode
 from bulbutil.utils.geoip import GeoIP
 
@@ -101,8 +101,8 @@ class Sun:
         # whenever day changes, recalculate the maximum angle and maximum radiance for this day,
         # in order to be able to scale the color temperature/lightness accordingly
         if previous_dt.tzinfo != self._dt.tzinfo or \
-                        abs(previous_dt - self._dt).days > 0 or \
-                        previous_dt.day != self._dt.day:
+                abs(previous_dt - self._dt).days > 0 or \
+                previous_dt.day != self._dt.day:
             maxalt = 0.0
             maxrad = 0.0
 
@@ -177,14 +177,15 @@ class Sun:
 
 if __name__ == '__main__':
     # demonstration of how Sun works
+    bulb = mock.MockBulb()
     tz = get_localzone()
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
-    circ = Circadian(s, 2700, 6500)
+    circ = Circadian(s, bulb, 2700, 6500)
     print('#Time\tAzimuth\tAltitude\tRadiation\n')
     for i in range(144):
         dt = dt + timedelta(minutes=10)
         t = dt.isoformat()
         circ(dt)
-        time.sleep(0.2)
+        time.sleep(0.1)

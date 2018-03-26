@@ -25,6 +25,7 @@ class MockBulb(Bulb):
         self._root = None
 
         # logic-related
+        self._rgb = (0.0, 0.0, 0.0)
         self._brightness = 1.
         self._color = webcolors.rgb_to_hex((255, 255, 255))
         self._on = False
@@ -39,7 +40,8 @@ class MockBulb(Bulb):
 
     def update(self):
         self._widget_bulb.config(bg=self._color)
-        self._group_brightness.config(text='Brightness: {}'.format(self._brightness))
+        self._widget_brightness.config(text='Brightness: {}'.format(self._brightness))
+        self._widget_color.config(text='Color: R:{:.2f} G:{:.2f} B:{:.2f}'.format(*self._rgb))
         state = 'ON' if self._on else 'OFF'
         self._widget_on.config(text='Bulb state is: {}'.format(state))
 
@@ -55,8 +57,12 @@ class MockBulb(Bulb):
         self._widget_on = Label(self._frame, text='Bulb state not set')
         self._widget_on.pack(fill=X)
 
-        self._group_brightness = Label(self._frame, text='Brightness not set')
-        self._group_brightness.pack(fill=X)
+        self._widget_brightness = Label(self._frame, text='Brightness not set')
+        self._widget_brightness.pack(fill=X)
+
+        self._widget_color = Label(self._frame, text='Color not set')
+        self._widget_color.pack(fill=X)
+
         self._frame.update()
 
     @_update_tkinter
