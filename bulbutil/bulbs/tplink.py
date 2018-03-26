@@ -67,6 +67,6 @@ class TPLink(Bulb):
         return self._bulb.brightness / 100.0
 
     @brightness.setter
-    def brightness(self, value: float):
+    def brightness(self, brightness: float):
         '''Sets the current brightness value of the bulb, as a floating point value in [0,1] range'''
-        self._bulb.brightness = int(value * 100)
+        self._bulb.brightness = int(brightness * 100)
