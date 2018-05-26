@@ -1,71 +1,69 @@
 import colorsys
+import threading
 import time
-from tkinter import Frame, Tk, Label, X, PhotoImage
-from typing import Tuple, Callable, Any
+from os import path
+from typing import Tuple
 
+import pygame
 import webcolors as webcolors
 
 from bulbutil.bulbs import Bulb
 
 
-def _update_tkinter(f) -> Callable:
-    def wrapper(*args) -> Any:
-        self = args[0]
-        result = f(*args)
-        self.update()
-        return result
+class Pygame:
+    '''This is a small pygame app that represents the change of state of the virtual bulb'''
 
-    return wrapper
+    screen_size = (384, 600)
+
+    event_set_rgb = pygame.USEREVENT + 1
+
+    def __init__(self):
+        pygame.init()
+        screen = pygame.display.set_mode(self.screen_size)
+        self._done = False
+        clock = pygame.time.Clock()
+        bulb_image = pygame.image.load(path.join('..', '..', 'resources', 'bulb-384-600.png'))
+
+        while not self._done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self._done = True
+                elif event.type == self.event_set_rgb:
+                    screen.fill(event.rgb)
+            screen.blit(bulb_image, bulb_image.get_rect())
+            pygame.display.flip()
+
+            clock.tick(60)
+
+    @classmethod
+    def send_rgb_event(cls, rgb: Tuple[int, int, int]):
+        pygame.event.post(pygame.event.Event(cls.event_set_rgb, {'rgb': rgb}))
+
+    def __del__(self):
+        self._done = True
 
 
 class MockBulb(Bulb):
     '''This is a mock bulb that shows a GUI dialog representing the current color and brightness.'''
 
     def __init__(self):
-        self._root = None
-
         # logic-related
         self._rgb = (0.0, 0.0, 0.0)
         self._brightness = 1.
         self._color = webcolors.rgb_to_hex((255, 255, 255))
         self._on = False
 
-        # tkinter app init
-        root = Tk()
-        self._frame = Frame(root)
-        self.__setup_frame()
-        self._frame.pack()
-        root.update()
-        self._root = root
+        print('Creating game')
+        self._game_thread = threading.Thread(target=Pygame)
+        print('starting game')
+        self._game_thread.start()
+        print('game started')
 
-    def update(self):
-        self._widget_bulb.config(bg=self._color)
-        self._widget_brightness.config(text='Brightness: {}'.format(self._brightness))
-        self._widget_color.config(text='Color: R:{:.2f} G:{:.2f} B:{:.2f}'.format(*self._rgb))
-        state = 'ON' if self._on else 'OFF'
-        self._widget_on.config(text='Bulb state is: {}'.format(state))
+    def __del__(self):
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
+        self._game_thread.join()
+        print('cleaned up lol')
 
-        if self._root:
-            self._root.update()
-
-    def __setup_frame(self):
-        bulb_image = PhotoImage(file='../../resources/bulb-384-600.png')
-        self._widget_bulb = Label(self._frame, image=bulb_image)
-        self._widget_bulb.photo = bulb_image
-        self._widget_bulb.pack(fill=X)
-
-        self._widget_on = Label(self._frame, text='Bulb state not set')
-        self._widget_on.pack(fill=X)
-
-        self._widget_brightness = Label(self._frame, text='Brightness not set')
-        self._widget_brightness.pack(fill=X)
-
-        self._widget_color = Label(self._frame, text='Color not set')
-        self._widget_color.pack(fill=X)
-
-        self._frame.update()
-
-    @_update_tkinter
     def turn_on(self):
         self._on = True
         try:
@@ -73,25 +71,25 @@ class MockBulb(Bulb):
         except AttributeError:
             self._color = '#ffffff'
 
-    @_update_tkinter
     def turn_off(self):
         self._on = False
         self._backupcolor = self._color
         self._color = '#000000'
 
     @property
-    @_update_tkinter
     def rgb(self) -> Tuple[float, float, float]:
         '''Returns the current RGB color of the bulb in [0,1] range'''
         return self._rgb
 
     @rgb.setter
-    @_update_tkinter
     def rgb(self, rgb: Tuple[float, float, float]):
         '''Sets the current RGB color of the bulb. R, G, B have to be in [0,1] range'''
         self._rgb = rgb
         r, g, b = rgb
-        self._color = webcolors.rgb_to_hex((int(255 * r), int(255 * g), int(255 * b)))
+        r, g, b = (int(255 * r), int(255 * g), int(255 * b))
+        self._color = webcolors.rgb_to_hex((r, g, b))
+
+        Pygame.send_rgb_event((r, g, b))
 
     @property
     def brightness(self) -> float:
@@ -99,7 +97,6 @@ class MockBulb(Bulb):
         return self._brightness
 
     @brightness.setter
-    @_update_tkinter
     def brightness(self, brightness: float):
         '''Sets the current brightness value of the bulb, as a floating point value in [0,1] range'''
         self._brightness = brightness
@@ -125,3 +122,4 @@ if __name__ == '__main__':
     time.sleep(4)
     bulb.turn_off()
     time.sleep(3)
+    del (bulb)
