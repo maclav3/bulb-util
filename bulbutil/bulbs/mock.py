@@ -10,7 +10,7 @@ import webcolors as webcolors
 from bulbutil.bulbs import Bulb
 
 
-class Pygame:
+class App:
     '''This is a small pygame app that represents the change of state of the virtual bulb'''
 
     screen_size = (384, 600)
@@ -43,26 +43,29 @@ class Pygame:
         self._done = True
 
 
+def run():
+    App()
+
+
 class MockBulb(Bulb):
     '''This is a mock bulb that shows a GUI dialog representing the current color and brightness.'''
 
     def __init__(self):
-        # logic-related
         self._rgb = (0.0, 0.0, 0.0)
         self._brightness = 1.
         self._color = webcolors.rgb_to_hex((255, 255, 255))
         self._on = False
 
-        print('Creating game')
-        self._game_thread = threading.Thread(target=Pygame)
-        print('starting game')
+        print('Creating mock bulb')
+        self._game_thread = threading.Thread(target=run)
+        print('starting game thread')
         self._game_thread.start()
-        print('game started')
+        print('started')
 
     def __del__(self):
         pygame.event.post(pygame.event.Event(pygame.QUIT))
         self._game_thread.join()
-        print('cleaned up lol')
+        print('cleaned up')
 
     def turn_on(self):
         self._on = True
@@ -89,7 +92,7 @@ class MockBulb(Bulb):
         r, g, b = (int(255 * r), int(255 * g), int(255 * b))
         self._color = webcolors.rgb_to_hex((r, g, b))
 
-        Pygame.send_rgb_event((r, g, b))
+        App.send_rgb_event((r, g, b))
 
     @property
     def brightness(self) -> float:
