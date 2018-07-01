@@ -187,17 +187,14 @@ class Sun:
 
 if __name__ == '__main__':
     # demonstration of how Sun works
-    mock = mock
-    TPLink = TPLink
-    # bulb = mock.MockBulb()
-    bulb = TPLink('192.168.1.101')
+    bulb = mock.MockBulb()
     tz = get_localzone()
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
 
     circ = Circadian(s, bulb, 2700, 6500)
-    steps = 30
+    steps = 120
     for i in range(steps):
         dt = dt + timedelta(minutes=60 * 24 / steps)
         t = dt.isoformat()

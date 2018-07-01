@@ -22,7 +22,7 @@ class App:
         screen = pygame.display.set_mode(self.screen_size)
         self._done = False
         clock = pygame.time.Clock()
-        bulb_image = pygame.image.load(path.join('..', '..', 'resources', 'bulb-384-600.png'))
+        bulb_image = pygame.image.load(path.join('..', 'resources', 'img', 'bulb-384-600.png'))
 
         while not self._done:
             for event in pygame.event.get():
