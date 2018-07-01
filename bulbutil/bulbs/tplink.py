@@ -1,27 +1,37 @@
 import colorsys
-from typing import Tuple
+from typing import Tuple, Union
 
 from pyHS100 import Discover, SmartBulb
 
 from bulbutil.bulbs import Bulb, ConstantColorBulbException
 
+Number = Union[float, int]
+Float3 = Tuple[float, float, float]
+Int3 = Tuple[int, int, int]
+
+NoBulbException = Exception("No bulb found")
+
 
 class TPLink(Bulb):
     def __init__(self, ip=None):
+        bulb = None
         if not ip:
             d = Discover()
             devices = d.discover()
 
-            for ip, device in devices.iteritems():
+            for ip, device in devices.items():
                 if isinstance(device, SmartBulb):
                     bulb = device
         else:
             bulb = SmartBulb(ip)
 
-        self._bulb = bulb
+        if bulb:
+            self._bulb = bulb
+        else:
+            raise NoBulbException
 
     @classmethod
-    def _normalize_hsv(cls, hsv: Tuple[[float, int], [float, int], [float, int]]) -> Tuple[float, float, float]:
+    def _normalize_hsv(cls, hsv: Tuple[Number, Number, Number]) -> Float3:
         '''Converts TPLink's [0-360], [0-100], [0-100] HSV range to colorsys' [0-1],[0-1],[0-1]'''
         h, s, v = hsv
         h = h / 360.0
@@ -30,7 +40,7 @@ class TPLink(Bulb):
         return h, s, v
 
     @classmethod
-    def _denormalize_hsv(cls, hsv: Tuple[float, float, float]) -> Tuple[int, int, int]:
+    def _denormalize_hsv(cls, hsv: Tuple[Number, Number, Number]) -> Int3:
         '''Converts colorsys' [0-1],[0-1],[0-1] range into TPLink's [0-360],[0-360],[0-360]'''
         h, s, v = hsv
         h = int(h * 360)
@@ -47,13 +57,13 @@ class TPLink(Bulb):
             self._bulb.turn_off()
 
     @property
-    def rgb(self) -> Tuple[float, float, float]:
-        '''Returns the current RGB color of the bulb in [0,1] range'''
+    def rgb(self) -> Float3:
+        '''Returns thFloat3e current RGB color of the bulb in [0,1] range'''
         h, s, v = TPLink._normalize_hsv(self._bulb.hsv)
         return colorsys.hsv_to_rgb(h, s, v)
 
     @rgb.setter
-    def rgb(self, rgb: Tuple[float, float, float]):
+    def rgb(self, rgb: Float3):
         '''Sets the current RGB color of the bulb. R, G, B have to be in [0,1] range'''
         if not self._bulb.is_variable_color_temp:
             raise ConstantColorBulbException

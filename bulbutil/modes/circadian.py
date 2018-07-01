@@ -177,6 +177,7 @@ class Sun:
 if __name__ == '__main__':
     # demonstration of how Sun works
     bulb = mock.MockBulb()
+    # bulb = TPLink('192.168.1.101')
     tz = get_localzone()
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
