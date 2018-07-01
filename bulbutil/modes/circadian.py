@@ -9,7 +9,6 @@ from tzlocal import get_localzone
 
 from bulbutil import logger as log
 from bulbutil.bulbs import Bulb, mock
-from bulbutil.bulbs.tplink import TPLink
 from bulbutil.modes import Mode
 from bulbutil.utils.geoip import GeoIP
 

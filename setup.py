@@ -15,5 +15,9 @@ setup(
         'console_scripts': [
             'bulbutil = modes.__main__:main'
         ]
+    },
+    include_package_data = True,
+    package_data = {
+        '': ['*.png']
     }
 )

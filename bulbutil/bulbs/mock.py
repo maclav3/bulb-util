@@ -1,11 +1,11 @@
 import colorsys
 import threading
 import time
-from os import path
 from typing import Tuple
 
 import pygame
 import webcolors as webcolors
+from pip._vendor.pkg_resources import resource_filename
 
 from bulbutil.bulbs import Bulb
 
@@ -22,7 +22,8 @@ class App:
         screen = pygame.display.set_mode(self.screen_size)
         self._done = False
         clock = pygame.time.Clock()
-        bulb_image = pygame.image.load(path.join('..', 'resources', 'img', 'bulb-384-600.png'))
+        img = resource_filename('bulbutil', 'resources/img/bulb-384-600.png')
+        bulb_image = pygame.image.load(img)
 
         while not self._done:
             for event in pygame.event.get():
