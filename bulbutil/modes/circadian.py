@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta
+from math import sqrt
 
 import color_temp
 import pytz
@@ -8,10 +9,19 @@ from tzlocal import get_localzone
 
 from bulbutil import logger as log
 from bulbutil.bulbs import Bulb, mock
+from bulbutil.bulbs.tplink import TPLink
 from bulbutil.modes import Mode
 from bulbutil.utils.geoip import GeoIP
 
 default_timestep = 60  # seconds
+
+
+# A heuristic for altering the shape of [0,1] functions such as altitude and radiation; serves to adjust
+# the actual colors and brightnesses to be more usable for humans.
+#
+# A function that transforms [0,1] into [0,1] is recommended.
+def shaping_func(f: float) -> float:
+    return sqrt(f)
 
 
 class Circadian(Mode):
@@ -53,9 +63,10 @@ class Circadian(Mode):
         temp = int((self.max_temperature - self.min_temperature) * alt + self.min_temperature)
 
         self._bulb.turn_on()
-        r, g, b = color_temp.temperature_to_rgb(temp)
-        self._bulb.rgb = (float(r) / 255, float(g) / 255, float(b) / 255)
-        self._bulb.brightness = rad
+        rgb = color_temp.temperature_to_rgb(temp)
+        normFactor = max(rgb)
+        r, g, b = map(lambda color: color / normFactor * rad, rgb)
+        self._bulb.rgb = r, g, b
 
 
 class Sun:
@@ -176,15 +187,17 @@ class Sun:
 
 if __name__ == '__main__':
     # demonstration of how Sun works
-    bulb = mock.MockBulb()
-    # bulb = TPLink('192.168.1.101')
+    mock = mock
+    TPLink = TPLink
+    # bulb = mock.MockBulb()
+    bulb = TPLink('192.168.1.101')
     tz = get_localzone()
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
 
     circ = Circadian(s, bulb, 2700, 6500)
-    steps = 120
+    steps = 30
     for i in range(steps):
         dt = dt + timedelta(minutes=60 * 24 / steps)
         t = dt.isoformat()

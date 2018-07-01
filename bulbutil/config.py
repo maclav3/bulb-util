@@ -2,6 +2,8 @@ import sys
 
 import configargparse
 
+from bulbutil import logger
+
 
 def get():
     parser = configargparse.ArgumentParser(
@@ -32,7 +34,7 @@ def get():
     circadianOpts.add_argument('--min_temperature', type=float, default=2700,
                                help='''The lowest color temperature that will be set during daylight simulation.''')
 
-    circadianOpts.add_argument('--max_temperature', type=float, default=9000,
+    circadianOpts.add_argument('--max_temperature', type=float, default=6000,
                                help='''The highest color temperature that will be set during daylight simulation.
                                The color temperature will vary according to the position of the Sun in the sky.''')
 
@@ -40,6 +42,12 @@ def get():
                         help='''Set the timestep for changing the lighting.
                         Each mode has a default timestep that is best suited for its operation,
                         but you may override it if you wish.''')
+
+    parser.add_argument('bulb', type=str, help='''The name or IP address of the bulb that is to be controlled.
+    Enter 'mock' for a GUI mock bulb, used for testing.
+    Enter 'auto' for automatic discovery (not guaranteed to work for all kinds of bulbs).
+    
+    Otherwise, it is interpreted as the IP address of the bulb.''')
 
     args = parser.parse_args()
 

@@ -4,12 +4,11 @@ from typing import Tuple, Union
 from pyHS100 import Discover, SmartBulb
 
 from bulbutil.bulbs import Bulb, ConstantColorBulbException
+from bulbutil.exceptions import NoBulbException
 
 Number = Union[float, int]
 Float3 = Tuple[float, float, float]
 Int3 = Tuple[int, int, int]
-
-NoBulbException = Exception("No bulb found")
 
 
 class TPLink(Bulb):
