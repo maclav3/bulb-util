@@ -62,12 +62,14 @@ class MockBulb(Bulb):
         self._game_thread.start()
         print('started')
 
-    def __del__(self):
+    def kill(self):
         pygame.event.post(pygame.event.Event(pygame.QUIT))
         self._game_thread.join()
         print('cleaned up')
 
     def turn_on(self):
+        if self._on:
+            return
         self._on = True
         try:
             self._color = self._backupcolor
@@ -75,6 +77,8 @@ class MockBulb(Bulb):
             self._color = '#ffffff'
 
     def turn_off(self):
+        if not self._on:
+            return
         self._on = False
         self._backupcolor = self._color
         self._color = '#000000'
@@ -125,4 +129,4 @@ if __name__ == '__main__':
     time.sleep(4)
     bulb.turn_off()
     time.sleep(3)
-    del (bulb)
+    bulb.kill()

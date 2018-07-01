@@ -50,13 +50,12 @@ class Circadian(Mode):
             self._bulb.turn_off()
             return
 
-        brightness = int(100 * rad)
         temp = int((self.max_temperature - self.min_temperature) * alt + self.min_temperature)
 
         self._bulb.turn_on()
         r, g, b = color_temp.temperature_to_rgb(temp)
         self._bulb.rgb = (float(r) / 255, float(g) / 255, float(b) / 255)
-        self._bulb.brightness = brightness
+        self._bulb.brightness = rad
 
 
 class Sun:
@@ -182,10 +181,13 @@ if __name__ == '__main__':
     dt = datetime.now(tz)
     dt = datetime(dt.year, dt.month, dt.day, 0, 0, 0, 0)
     s = Sun()
+
     circ = Circadian(s, bulb, 2700, 6500)
-    print('#Time\tAzimuth\tAltitude\tRadiation\n')
-    for i in range(144):
-        dt = dt + timedelta(minutes=10)
+    steps = 120
+    for i in range(steps):
+        dt = dt + timedelta(minutes=60 * 24 / steps)
         t = dt.isoformat()
         circ(dt)
         time.sleep(0.1)
+
+    bulb.kill()

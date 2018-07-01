@@ -39,10 +39,12 @@ class TPLink(Bulb):
         return h, s, v
 
     def turn_on(self):
-        self._bulb.turn_on()
+        if self._bulb.is_off:
+            self._bulb.turn_on()
 
     def turn_off(self):
-        self._bulb.turn_off()
+        if self._bulb.is_on:
+            self._bulb.turn_off()
 
     @property
     def rgb(self) -> Tuple[float, float, float]:
